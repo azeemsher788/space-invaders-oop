@@ -7,7 +7,12 @@
 
 A production-grade, highly polished clone of the arcade classic, *Space Invaders*. 
 
-Developed by [@azeemsher788](https://github.com/azeemsher788).
+---
+
+## 📸 Game Preview
+
+![Space Invaders — Game Preview](preview.jpg)
+
 
 This project was built as a portfolio piece to demonstrate advanced **Object-Oriented Programming (OOP) design patterns**, **game-loop optimization**, and **clean architectural separation of concerns** in Python.
 
