@@ -1,107 +1,82 @@
-# Space Invaders — Python/Pygame Implementation
+# Space Invaders
 
-![Space Invaders](https://img.shields.io/badge/Python-3.9+-blue.svg)
-![Pygame](https://img.shields.io/badge/Pygame-2.0+-green.svg)
-![License](https://img.shields.io/badge/License-MIT-purple.svg)
-![Architecture](https://img.shields.io/badge/Architecture-OOP%20%7C%20Component-orange.svg)
-
-A production-grade, highly polished clone of the arcade classic, *Space Invaders*. 
-
----
+A production-grade Python/Pygame implementation of the classic arcade shooter, built with a strong emphasis on clean architecture, object-oriented design, and maintainability.
 
 ## 📸 Game Preview
 
 ![Space Invaders — Game Preview](preview.jpg)
 
+## What It Does & Who It Is For
+This project provides a robust, cross-platform local clone of *Space Invaders*. It is designed for developers who want to study game loop mechanics, Pygame optimizations, and decoupled object-oriented architecture in Python.
 
-This project was built as a portfolio piece to demonstrate advanced **Object-Oriented Programming (OOP) design patterns**, **game-loop optimization**, and **clean architectural separation of concerns** in Python.
+## Core Features
+- **Dynamic Difficulty Scaling**: Enemy fleet speed scales non-linearly based on the remaining alien count.
+- **Destructible Environments**: Player bunkers take localized damage based on projectile intersection geometry.
+- **Entity State Machines**: Centralized state management for game phases (Title, Playing, Game Over) and enemy behavior.
+- **Procedural VFX**: Visual effects like starfields and explosions are generated procedurally without external image dependencies.
+- **Deterministic Loop**: Input handling and physics operate independently of rendering frame rates.
 
----
+## Technology Stack
+- **Language**: Python 3.9+
+- **Graphics Framework**: Pygame 2.0+
+- **Tooling**: Pytest (Unit Testing), Black/Isort (Formatting), Mypy (Type checking), Pylint (Linting)
 
-## 🏗️ Architecture & Code Quality
+## Architecture Overview
+The application uses a decoupled Object-Oriented approach:
+- **`engine.py` (GameEngine)**: The central orchestrator. Maintains the game loop, limiting updates using `pygame.time.Clock.tick` while passing delta-time (`dt`) for deterministic physics.
+- **`entities.py` (Entity Base)**: Defines the core logic for the Player, Aliens, UFOs, and Projectiles. Entities own their logical state but delegate rendering.
+- **`fleet.py` (AlienFleet)**: A state machine governing the collective movement of the alien armada (Horizontal shift, Edge check, Vertical drop).
+- **`bunker.py` (Bunker)**: Manages binary occupancy grids representing destructible tiles.
 
-The codebase strictly adheres to object-oriented principles, modularizing the game into cleanly decoupled components. Rendering logic is entirely separated from physics and state updates.
+## Engineering Decisions & Tradeoffs
 
-### Core Modules
+### 1. Two-Phase Collision Detection
+Collision detection relies on a Two-Phase Bounding-Box (AABB) approach. 
+- **Decision**: A broad phase categorizes active projectiles, followed by a narrow phase using `pygame.Rect.colliderect()`.
+- **Tradeoff**: While an ECS (Entity Component System) or spatial hash grid scales better for thousands of entities, AABB is $O(1)$ per check and perfectly optimized for the low entity count (<100) of this game, avoiding over-engineering.
 
-* **`engine.py` (GameEngine)**: The central orchestrator. Owns the canonical fixed-step game loop, manages state transitions (`TITLE` → `PLAYING` → `GAME_OVER`), delegates collision passes, and dispatches non-blocking keyboard input.
-* **`entities.py` (Entity Base & Actors)**: Defines the base `Entity` class and concrete implementations (`PlayerShip`, `Alien`, `UFO`, `Projectile`, `BunkerTile`). Entities own their logical state (position, health) but delegate rendering.
-* **`fleet.py` (AlienFleet)**: The state machine managing the alien armada as a cohesive grid. 
-* **`sprites.py` (Surface Factory)**: A purely procedural sprite generator using anti-aliased polygons and pixel-art bitmasks. **Zero external image dependencies**.
-* **`bunker.py` (Bunker)**: Manages destructible defensive barriers via a binary occupancy grid of `BunkerTile` blocks.
-* **`hud.py` (HUD)**: A strictly read-only overlay renderer (score, lives, level).
-* **`vfx.py` (VFXManager)**: Manages transient particle effects like starburst explosions and floating score popups.
-* **`constants.py`**: The single source of truth for all game-wide tunables.
+### 2. Input Polling vs Event Callbacks
+- **Decision**: Key-state polling (toggling boolean flags on `KEYDOWN` / `KEYUP`) rather than relying on OS-level event callbacks.
+- **Tradeoff**: Bypasses the OS-level key repeat delay (which introduces artificial latency), allowing simultaneous movement and firing. However, this means input state is inextricably tied to the game tick loop.
 
----
+### 3. Procedural Assets
+- **Decision**: Sprites and VFX are built procedurally at runtime using Pygame shape generation rather than loading `.png` files.
+- **Tradeoff**: Dramatically reduces the repository size and simplifies installation, but limits the artistic complexity of the sprites to pixel-art geometries.
 
-## 👾 Game Mechanics & State Machines
-
-### 1. Fleet Dynamics & State Machine
-The `AlienFleet` operates on a three-phase tick-based state machine:
-1. `HORIZONTAL`: Shift all alive aliens by `±dx` pixels.
-2. `CHECK_EDGE`: If the left/right screen bounds are intersected, schedule a drop.
-3. `DROP`: Shift the entire grid down by `dy` pixels and invert horizontal direction.
-
-### 2. Dynamic Difficulty Scaling
-To replicate the legendary "heartbeat" acceleration of the arcade original, the fleet's movement interval scales dynamically based on the surviving alien count. As aliens are destroyed, the delay between fleet ticks decreases linearly from `ALIEN_MOVE_INTERVAL_MAX` to `ALIEN_MOVE_INTERVAL_MIN`.
-
-### 3. Combat & Firing Logic
-* **Alien Targeting**: Only the "front-line" (bottom-most alive alien in each column) is eligible to drop bombs, calculated dynamically each frame.
-* **Cooldowns**: Player weapon firing is gated by a timestamp-based cooldown to prevent projectile spamming, governed by `constants.PLAYER_LASER_COOLDOWN`.
-
-### 4. Collision Math (AABB)
-Collision detection is optimized using a **Two-Phase Bounding-Box (AABB)** approach:
-* **Broad Phase**: Projectiles are grouped and filtered by category (Lasers vs Aliens, Bombs vs Bunkers).
-* **Narrow Phase**: Exact overlap testing via `pygame.Rect.colliderect()`, operating in $O(1)$ time per check. The bunker collision systematically tests active projectile rectangles against the destructible `BunkerTile` sub-grid.
-
----
-
-## 🎮 Rendering & Controls
-
-* **Decoupled Game Loop**: The engine limits updates using `pygame.time.Clock.tick(FPS)` to pass a delta-time (`dt`) to entity updates. This guarantees deterministic physics logic regardless of frame-rate fluctuations.
-* **Zero Input Latency**: Input is handled via non-blocking key-state polling (`KEYDOWN` and `KEYUP` flag toggling) rather than event-driven callbacks. This totally bypasses OS-level key repeat latency, allowing for responsive, simultaneous movement and firing.
-* **Procedural VFX**: The `background.py` parallax starfield and the `vfx.py` explosion effects are generated entirely through dynamic draw calls, requiring no external `.png` assets while providing a rich visual aesthetic.
-
----
-
-## 🚀 Setup & Execution
+## Local Setup & Execution
 
 ### Prerequisites
-* Python 3.9+
-* `pygame` (Version 2.0.0 or higher)
+- Python 3.9 or higher
+- Git
 
 ### Installation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/azeemsher788/space-invaders-oop.git
-   cd space-invaders-oop/95
-   ```
-2. Install the required dependencies:
-   ```bash
-   pip install pygame
-   ```
+Clone the repository and install the development dependencies:
+```bash
+git clone https://github.com/azeemsher788/space-invaders-oop.git
+cd space-invaders-oop
+pip install -e .[dev]
+```
 
 ### Running the Game
-Launch the entry point script:
+Launch the entry script:
 ```bash
+make run
+# or run directly:
 python main.py
 ```
 
 ### Controls
-* **Movement**: `Left / Right Arrows` or `A / D`
-* **Fire**: `Spacebar` or `Up Arrow` or `W`
+* **Move**: `Left / Right Arrows` or `A / D`
+* **Fire**: `Spacebar` or `W` or `Up Arrow`
 * **Pause**: `P`
-* **Confirm / Restart**: `Enter`
+* **Select**: `Enter`
 
----
+## Development & Testing
+The project includes a `Makefile` and `pyproject.toml` for standard workflows.
+- **Format Code**: `make format`
+- **Lint Code**: `make lint` (Runs `pylint` and `mypy` strict)
+- **Run Tests**: `make test` (Runs `pytest` unit test suite)
 
-## 💼 For Recruiters & Clients
-
-This repository highlights a focus on:
-- **Clean Architecture & SOLID Principles**: Code is modular, highly decoupled, and easy to extend.
-- **Strong Typing**: Fully PEP-484 compliant type hinting across the entire codebase.
-- **Maintainability**: Extensive docstrings, clean variable naming, and configuration abstraction (via `constants.py`).
-- **Optimization**: Efficient state handling, memory-friendly procedural asset generation, and O(n) collision polling without the overhead of heavy ECS (Entity Component System) libraries where inappropriate.
-
-Feel free to explore the source code to review the implementation details!
+## Known Limitations & Future Improvements
+- **No Sound System**: The game currently lacks SFX or music. Integrating Pygame's `mixer` module is planned.
+- **State Persistence**: High scores are lost when the game closes. A lightweight `sqlite3` persistence layer would solve this.
