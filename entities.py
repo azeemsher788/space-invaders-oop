@@ -27,15 +27,17 @@ Design decisions
 
 from __future__ import annotations
 
-import pygame
 from typing import Optional
+
+import pygame
+
 import constants as C
 import sprites as SPR
-
 
 # ---------------------------------------------------------------------------
 # Abstract base
 # ---------------------------------------------------------------------------
+
 
 class Entity:
     """
@@ -62,8 +64,10 @@ class Entity:
     def rect(self) -> pygame.Rect:
         """Bounding-box rect derived from current position and surface size."""
         return pygame.Rect(
-            int(self.x), int(self.y),
-            self.surface.get_width(), self.surface.get_height()
+            int(self.x),
+            int(self.y),
+            self.surface.get_width(),
+            self.surface.get_height(),
         )
 
     # ------------------------------------------------------------------
@@ -85,6 +89,7 @@ class Entity:
 # ---------------------------------------------------------------------------
 # Player ship
 # ---------------------------------------------------------------------------
+
 
 class PlayerShip(Entity):
     """
@@ -120,7 +125,7 @@ class PlayerShip(Entity):
         self.score: int = 0
 
         # key-state flags
-        self.move_left: bool  = False
+        self.move_left: bool = False
         self.move_right: bool = False
         self.fire_pressed: bool = False
 
@@ -168,20 +173,21 @@ class PlayerShip(Entity):
         if self.is_invincible:
             return
         self.lives -= 1
-        self.invincible_until = pygame.time.get_ticks() + 2_000   # 2 s grace
+        self.invincible_until = pygame.time.get_ticks() + 2_000  # 2 s grace
 
     # ------------------------------------------------------------------
     def draw(self, screen: pygame.Surface) -> None:
         """Draw the ship; flash during invincibility using alternating frames."""
         if self.is_invincible:
             if (pygame.time.get_ticks() // 100) % 2 == 0:
-                return   # blink effect
+                return  # blink effect
         screen.blit(self.surface, (int(self.x), int(self.y)))
 
 
 # ---------------------------------------------------------------------------
 # Alien
 # ---------------------------------------------------------------------------
+
 
 class Alien(Entity):
     """
@@ -237,6 +243,7 @@ class Alien(Entity):
 # UFO (Mystery Ship)
 # ---------------------------------------------------------------------------
 
+
 class UFO(Entity):
     """
     The bonus mystery ship that occasionally crosses the top of the screen.
@@ -253,7 +260,9 @@ class UFO(Entity):
     UFO_H: int = 24
 
     def __init__(self) -> None:
+        # pylint: disable=import-outside-toplevel
         import random
+
         self.direction: int = random.choice((-1, 1))
         if self.direction == 1:
             start_x = -self.UFO_W
@@ -273,13 +282,13 @@ class UFO(Entity):
 # Projectiles
 # ---------------------------------------------------------------------------
 
+
 class Projectile(Entity):
     """Base class for any projectile (laser or bomb)."""
 
-    def __init__(self, x: float, y: float,
-                 dy: float, surface: pygame.Surface) -> None:
+    def __init__(self, x: float, y: float, dy: float, surface: pygame.Surface) -> None:
         super().__init__(x, y, surface)
-        self.dy: float = dy   # vertical velocity (pixels/frame, sign=direction)
+        self.dy: float = dy  # vertical velocity (pixels/frame, sign=direction)
 
     def update(self, dt: int) -> None:  # noqa: ARG002
         self.y += self.dy
@@ -311,6 +320,7 @@ class Bomb(Projectile):
 # ---------------------------------------------------------------------------
 # BunkerTile
 # ---------------------------------------------------------------------------
+
 
 class BunkerTile(Entity):
     """

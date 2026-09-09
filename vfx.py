@@ -16,10 +16,10 @@ import pygame
 import constants as C
 import sprites as SPR
 
-
 # ---------------------------------------------------------------------------
 # Individual VFX objects
 # ---------------------------------------------------------------------------
+
 
 class Explosion:
     """
@@ -70,7 +70,7 @@ class ScorePopup:
         Cleared when alpha reaches zero.
     """
 
-    _DURATION: int = 900   # ms
+    _DURATION: int = 900  # ms
     _RISE_SPEED: float = 0.04  # pixels per ms
 
     def __init__(self, text: str, x: int, y: int) -> None:
@@ -107,7 +107,7 @@ class UFOScoreDisplay:
         self.alive: bool = True
         self._font = pygame.font.SysFont("consolas", 26, bold=True)
 
-    def update(self, dt: int) -> None:  # noqa: ARG002
+    def update(self, _dt: int) -> None:  # noqa: ARG002
         if pygame.time.get_ticks() - self._born > self._DURATION:
             self.alive = False
 
@@ -122,6 +122,7 @@ class UFOScoreDisplay:
 # ---------------------------------------------------------------------------
 # Manager
 # ---------------------------------------------------------------------------
+
 
 class VFXManager:
     """
@@ -161,8 +162,8 @@ class VFXManager:
         for u in self._ufo_displays:
             u.update(dt)
 
-        self._explosions  = [e for e in self._explosions  if e.alive]
-        self._popups      = [p for p in self._popups      if p.alive]
+        self._explosions = [e for e in self._explosions if e.alive]
+        self._popups = [p for p in self._popups if p.alive]
         self._ufo_displays = [u for u in self._ufo_displays if u.alive]
 
     def draw(self, screen: pygame.Surface) -> None:

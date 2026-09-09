@@ -29,7 +29,7 @@ import constants as C
 from entities import BunkerTile, Projectile
 
 if TYPE_CHECKING:
-    pass   # avoid circular imports if needed
+    pass  # avoid circular imports if needed
 
 
 # ---------------------------------------------------------------------------
@@ -66,12 +66,12 @@ class Bunker:
 
     COLS: int = len(_SHAPE[0])
     ROWS: int = len(_SHAPE)
-    WIDTH:  int = COLS * C.BUNKER_TILE_SIZE
+    WIDTH: int = COLS * C.BUNKER_TILE_SIZE
     HEIGHT: int = ROWS * C.BUNKER_TILE_SIZE
 
     def __init__(self, left_x: int, top_y: int) -> None:
         self.left_x: int = left_x
-        self.top_y:  int = top_y
+        self.top_y: int = top_y
         self.tiles: list[BunkerTile] = []
         self._build_tiles()
 
@@ -84,7 +84,7 @@ class Bunker:
             for col, present in enumerate(cells):
                 if present:
                     tx = self.left_x + col * s
-                    ty = self.top_y  + row * s
+                    ty = self.top_y + row * s
                     self.tiles.append(BunkerTile(tx, ty))
 
     # ------------------------------------------------------------------
@@ -140,6 +140,7 @@ class Bunker:
 # Factory helper
 # ---------------------------------------------------------------------------
 
+
 def build_bunkers() -> list[Bunker]:
     """
     Construct and evenly space BUNKER_COUNT bunkers across the screen width.
@@ -150,7 +151,7 @@ def build_bunkers() -> list[Bunker]:
         A list of freshly initialised Bunker objects.
     """
     bunkers: list[Bunker] = []
-    usable_width = C.SCREEN_WIDTH - 2 * 60   # left & right margin
+    usable_width = C.SCREEN_WIDTH - 2 * 60  # left & right margin
     spacing = usable_width // C.BUNKER_COUNT
     for i in range(C.BUNKER_COUNT):
         bx = 60 + i * spacing + (spacing - Bunker.WIDTH) // 2

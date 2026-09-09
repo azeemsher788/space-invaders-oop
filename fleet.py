@@ -41,8 +41,9 @@ from entities import Alien, Bomb
 
 class _MovePhase(Enum):
     """Internal state-machine phases for fleet movement."""
+
     HORIZONTAL = auto()
-    DROP       = auto()
+    DROP = auto()
 
 
 class AlienFleet:
@@ -77,7 +78,7 @@ class AlienFleet:
         Active bombs dropped by the fleet.
     """
 
-    _MOVE_DX: int = 12   # pixels per horizontal step
+    _MOVE_DX: int = 12  # pixels per horizontal step
 
     def __init__(self, level: int = 1) -> None:
         self._alien_surfaces = SPR.make_alien_surfaces()
@@ -204,10 +205,11 @@ class AlienFleet:
 
             # Check for edge collision
             hit_right = self._rightmost_x() >= C.SCREEN_WIDTH - 10
-            hit_left  = self._leftmost_x()  <= 10
+            hit_left = self._leftmost_x() <= 10
 
-            if (self.direction == 1 and hit_right) or \
-               (self.direction == -1 and hit_left):
+            if (self.direction == 1 and hit_right) or (
+                self.direction == -1 and hit_left
+            ):
                 self._phase = _MovePhase.DROP
         else:
             # DROP phase: move fleet down then reverse direction

@@ -15,19 +15,30 @@ primitives directly — a clean separation of concerns.
 from __future__ import annotations
 
 import math
-import pygame
-from constants import (
-    PLAYER_WIDTH, PLAYER_HEIGHT,
-    ALIEN_WIDTH, ALIEN_HEIGHT,
-    BUNKER_TILE_SIZE,
-    GREEN, CYAN, MAGENTA, ORANGE, RED, WHITE, YELLOW,
-    BUNKER_GREEN, SHIELD_COLOR,
-)
 
+import pygame
+
+from constants import (
+    ALIEN_HEIGHT,
+    ALIEN_WIDTH,
+    BUNKER_GREEN,
+    BUNKER_TILE_SIZE,
+    CYAN,
+    GREEN,
+    MAGENTA,
+    ORANGE,
+    PLAYER_HEIGHT,
+    PLAYER_WIDTH,
+    RED,
+    SHIELD_COLOR,
+    WHITE,
+    YELLOW,
+)
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _surface(w: int, h: int) -> pygame.Surface:
     """Return a transparent surface of the given dimensions."""
@@ -36,8 +47,7 @@ def _surface(w: int, h: int) -> pygame.Surface:
     return surf
 
 
-def _hline(surf: pygame.Surface, y: int, x1: int, x2: int,
-           color: tuple) -> None:
+def _hline(surf: pygame.Surface, y: int, x1: int, x2: int, color: tuple) -> None:
     """Draw a horizontal run of pixels (inclusive range)."""
     pygame.draw.line(surf, color, (x1, y), (x2, y))
 
@@ -45,6 +55,7 @@ def _hline(surf: pygame.Surface, y: int, x1: int, x2: int,
 # ---------------------------------------------------------------------------
 # Player ship
 # ---------------------------------------------------------------------------
+
 
 def make_player_surface() -> pygame.Surface:
     """
@@ -73,10 +84,18 @@ def make_player_surface() -> pygame.Surface:
     pygame.draw.polygon(surf, ORANGE, body_pts)
 
     # --- left / right wings ---
-    left_wing = [(0, h), (w // 2 - 14, h), (w // 2 - 8, h // 2),
-                 (w // 2 - 4, h // 2 + 4)]
-    right_wing = [(w, h), (w // 2 + 14, h), (w // 2 + 8, h // 2),
-                  (w // 2 + 4, h // 2 + 4)]
+    left_wing = [
+        (0, h),
+        (w // 2 - 14, h),
+        (w // 2 - 8, h // 2),
+        (w // 2 - 4, h // 2 + 4),
+    ]
+    right_wing = [
+        (w, h),
+        (w // 2 + 14, h),
+        (w // 2 + 8, h // 2),
+        (w // 2 + 4, h // 2 + 4),
+    ]
     wing_color = (180, 80, 0)
     pygame.draw.polygon(surf, wing_color, left_wing)
     pygame.draw.polygon(surf, wing_color, right_wing)
@@ -96,13 +115,14 @@ def make_player_surface() -> pygame.Surface:
 # Alien sprites (5 rows → 3 visual types, two-frame animation)
 # ---------------------------------------------------------------------------
 
+
 def _alien_type_for_row(row: int) -> int:
     """Map a fleet row index (0 = bottom) to an alien visual type (0/1/2)."""
     if row <= 1:
-        return 0   # squid  — green
+        return 0  # squid  — green
     if row <= 3:
-        return 1   # crab   — cyan
-    return 2       # octopus — magenta
+        return 1  # crab   — cyan
+    return 2  # octopus — magenta
 
 
 def _make_squid(frame: int) -> pygame.Surface:
@@ -196,17 +216,17 @@ def _make_octopus(frame: int) -> pygame.Surface:
     return surf
 
 
-def _draw_pattern(surf: pygame.Surface, pattern: list[str],
-                  color: tuple, w: int, h: int) -> None:
+def _draw_pattern(
+    surf: pygame.Surface, pattern: list[str], color: tuple, w: int, h: int
+) -> None:
     """Blit a pixel-art pattern string onto a surface, centred."""
     cell_w = w // max(len(row) for row in pattern)
     cell_h = h // len(pattern)
     for ry, row in enumerate(pattern):
         for cx, ch in enumerate(row):
-            if ch == 'X':
+            if ch == "X":
                 pygame.draw.rect(
-                    surf, color,
-                    (cx * cell_w, ry * cell_h, cell_w, cell_h)
+                    surf, color, (cx * cell_w, ry * cell_h, cell_w, cell_h)
                 )
 
 
@@ -235,6 +255,7 @@ def alien_type_for_row(row: int) -> int:
 # UFO / Mystery ship
 # ---------------------------------------------------------------------------
 
+
 def make_ufo_surface() -> pygame.Surface:
     """Return a neon-red UFO/mystery-ship surface."""
     w, h = 52, 24
@@ -250,11 +271,12 @@ def make_ufo_surface() -> pygame.Surface:
 # Projectiles
 # ---------------------------------------------------------------------------
 
+
 def make_laser_surface() -> pygame.Surface:
     """Player laser bolt — thin neon-orange pillar with glow."""
     surf = _surface(4, 18)
     pygame.draw.rect(surf, ORANGE, (1, 0, 2, 18))
-    pygame.draw.rect(surf, WHITE,  (1, 6, 2, 6))
+    pygame.draw.rect(surf, WHITE, (1, 6, 2, 6))
     return surf
 
 
@@ -269,6 +291,7 @@ def make_bomb_surface() -> pygame.Surface:
 # ---------------------------------------------------------------------------
 # Bunker tile
 # ---------------------------------------------------------------------------
+
 
 def make_bunker_tile_surface(health: int, max_health: int) -> pygame.Surface:
     """
@@ -303,6 +326,7 @@ def make_bunker_tile_surface(health: int, max_health: int) -> pygame.Surface:
 # ---------------------------------------------------------------------------
 # Explosion
 # ---------------------------------------------------------------------------
+
 
 def make_explosion_surface(size: int = 30) -> pygame.Surface:
     """

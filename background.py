@@ -12,7 +12,9 @@ allocation.
 from __future__ import annotations
 
 import random
+
 import pygame
+
 import constants as C
 
 
@@ -22,8 +24,8 @@ class Star:
     __slots__ = ("x", "y", "layer", "brightness", "speed")
 
     def __init__(self) -> None:
-        self.x: float  = random.uniform(0, C.SCREEN_WIDTH)
-        self.y: float  = random.uniform(0, C.SCREEN_HEIGHT)
+        self.x: float = random.uniform(0, C.SCREEN_WIDTH)
+        self.y: float = random.uniform(0, C.SCREEN_HEIGHT)
         self.layer: int = random.randint(0, C.STAR_LAYERS - 1)
         # Brighter = closer (higher layer number)
         base = 80 + self.layer * 50
@@ -56,5 +58,5 @@ class Starfield:
         """Render all stars as single pixels with layer-dependent brightness."""
         for s in self._stars:
             b = s.brightness
-            color = (b, b, min(255, b + 30))   # slight blue tint
+            color = (b, b, min(255, b + 30))  # slight blue tint
             screen.set_at((int(s.x), int(s.y)), color)

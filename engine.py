@@ -41,29 +41,30 @@ from typing import Optional
 import pygame
 
 import constants as C
-from entities import PlayerShip, UFO, Laser, Bomb
-from fleet import AlienFleet
-from bunker import Bunker, build_bunkers
-from hud import HUD
 from background import Starfield
+from bunker import Bunker, build_bunkers
+from entities import UFO, Laser, PlayerShip
+from fleet import AlienFleet
+from hud import HUD
 from vfx import VFXManager
-
 
 # ---------------------------------------------------------------------------
 # Game-state enumeration
 # ---------------------------------------------------------------------------
 
+
 class GameState(Enum):
-    TITLE          = auto()
-    PLAYING        = auto()
+    TITLE = auto()
+    PLAYING = auto()
     LEVEL_COMPLETE = auto()
-    GAME_OVER      = auto()
-    PAUSED         = auto()
+    GAME_OVER = auto()
+    PAUSED = auto()
 
 
 # ---------------------------------------------------------------------------
 # GameEngine
 # ---------------------------------------------------------------------------
+
 
 class GameEngine:
     """
@@ -106,20 +107,20 @@ class GameEngine:
         # --- game state ---
         self.level: int = 1
         self.state: GameState = GameState.TITLE
-        self._state_timer: int = 0    # timestamp of last state transition
+        self._state_timer: int = 0  # timestamp of last state transition
 
         # --- title screen ---
         self._title_font = pygame.font.SysFont("consolas", 58, bold=True)
-        self._sub_font   = pygame.font.SysFont("consolas", 24)
+        self._sub_font = pygame.font.SysFont("consolas", 24)
 
         # --- create game objects (will be reset per game) ---
         self.player: PlayerShip = PlayerShip()
-        self.fleet: AlienFleet  = AlienFleet(self.level)
+        self.fleet: AlienFleet = AlienFleet(self.level)
         self.bunkers: list[Bunker] = build_bunkers()
-        self.lasers: list[Laser]   = []
-        self.ufo: Optional[UFO]    = None
-        self._last_ufo_time: int   = pygame.time.get_ticks()
-        self._ufo_killed_timer: int = 0   # shows score label briefly
+        self.lasers: list[Laser] = []
+        self.ufo: Optional[UFO] = None
+        self._last_ufo_time: int = pygame.time.get_ticks()
+        self._ufo_killed_timer: int = 0  # shows score label briefly
 
         self.hud: HUD = HUD(self.screen)
 
@@ -181,7 +182,7 @@ class GameEngine:
             return
 
         if self.state == GameState.LEVEL_COMPLETE:
-            return   # auto-transitions after a short delay
+            return  # auto-transitions after a short delay
 
         # --- Playing / Paused ---
         if key == pygame.K_p:
@@ -213,12 +214,12 @@ class GameEngine:
 
     def _start_game(self) -> None:
         """Reset all game objects and transition to PLAYING state."""
-        self.level  = 1
+        self.level = 1
         self.player = PlayerShip()
-        self.fleet  = AlienFleet(self.level)
+        self.fleet = AlienFleet(self.level)
         self.bunkers = build_bunkers()
-        self.lasers  = []
-        self.ufo     = None
+        self.lasers = []
+        self.ufo = None
         self._last_ufo_time = pygame.time.get_ticks()
         self.vfx = VFXManager()
         self.state = GameState.PLAYING
@@ -226,10 +227,10 @@ class GameEngine:
     def _advance_level(self) -> None:
         """Move to the next level: rebuild fleet and bunkers, keep player."""
         self.level += 1
-        self.fleet   = AlienFleet(self.level)
+        self.fleet = AlienFleet(self.level)
         self.bunkers = build_bunkers()
-        self.lasers  = []
-        self.ufo     = None
+        self.lasers = []
+        self.ufo = None
         self._last_ufo_time = pygame.time.get_ticks()
         self.state = GameState.PLAYING
 
@@ -340,14 +341,14 @@ class GameEngine:
         for laser in self.lasers:
             if not laser.alive:
                 continue
-            for alien in self.fleet.aliens[:]:   # iterate a snapshot
+            for alien in self.fleet.aliens[:]:  # iterate a snapshot
                 if laser.rect.colliderect(alien.rect):
                     pts = self.fleet.kill_alien(alien)
                     self.player.score += pts
                     self.hud.update_high_score(self.player.score)
                     laser.alive = False
                     # VFX
-                    cx = int(alien.x + C.ALIEN_WIDTH  // 2)
+                    cx = int(alien.x + C.ALIEN_WIDTH // 2)
                     cy = int(alien.y + C.ALIEN_HEIGHT // 2)
                     self.vfx.spawn_explosion(cx, cy, 32)
                     self.vfx.spawn_popup(f"+{pts}", cx - 12, cy - 20)
@@ -409,7 +410,7 @@ class GameEngine:
             if bomb.rect.colliderect(self.player.rect):
                 bomb.alive = False
                 self.player.hit()
-                cx = int(self.player.x + C.PLAYER_WIDTH  // 2)
+                cx = int(self.player.x + C.PLAYER_WIDTH // 2)
                 cy = int(self.player.y + C.PLAYER_HEIGHT // 2)
                 self.vfx.spawn_explosion(cx, cy, 48)
 
@@ -467,19 +468,21 @@ class GameEngine:
         pulse = abs(((now // 8) % 255) - 127)
         title_color = (255, 80 + pulse // 3, 0)
         title_surf = self._title_font.render("SPACE INVADERS", True, title_color)
-        tx = C.SCREEN_WIDTH  // 2 - title_surf.get_width() // 2
+        tx = C.SCREEN_WIDTH // 2 - title_surf.get_width() // 2
         ty = C.SCREEN_HEIGHT // 2 - 140
         self.screen.blit(title_surf, (tx, ty))
 
         # --- Sub-heading ---
-        sub = self._sub_font.render("by  Azeem Sher  —  github.com/azeemsher788", True, C.CYAN)
+        sub = self._sub_font.render(
+            "by  Azeem Sher  —  github.com/azeemsher788", True, C.CYAN
+        )
         self.screen.blit(sub, (C.SCREEN_WIDTH // 2 - sub.get_width() // 2, ty + 80))
 
         # --- Score table ---
         rows = [
             ("= = =", C.MAGENTA, "30 PTS"),
-            ("> < >", C.CYAN,    "20 PTS"),
-            ("v ^ v", C.GREEN,   "10 PTS"),
+            ("> < >", C.CYAN, "20 PTS"),
+            ("v ^ v", C.GREEN, "10 PTS"),
             (" UFO ", (255, 40, 40), "??? PTS"),
         ]
         sy = ty + 145
@@ -493,26 +496,22 @@ class GameEngine:
         # --- Blinking PRESS START ---
         if (now // 500) % 2 == 0:
             ps = self._sub_font.render("PRESS  ENTER  TO  START", True, C.YELLOW)
-            self.screen.blit(ps, (C.SCREEN_WIDTH // 2 - ps.get_width() // 2,
-                                  ty + 305))
+            self.screen.blit(ps, (C.SCREEN_WIDTH // 2 - ps.get_width() // 2, ty + 305))
 
         # --- Controls ---
         ctrl = self._sub_font.render(
-            "A / ← → / D  move    SPACE  fire    P  pause",
-            True, (120, 120, 160)
+            "A / ← → / D  move    SPACE  fire    P  pause", True, (120, 120, 160)
         )
-        self.screen.blit(ctrl, (C.SCREEN_WIDTH // 2 - ctrl.get_width() // 2,
-                                C.SCREEN_HEIGHT - 50))
+        self.screen.blit(
+            ctrl, (C.SCREEN_WIDTH // 2 - ctrl.get_width() // 2, C.SCREEN_HEIGHT - 50)
+        )
 
     def _render_pause_overlay(self) -> None:
         """Semi-transparent darkening overlay with PAUSED text."""
         overlay = pygame.Surface((C.SCREEN_WIDTH, C.SCREEN_HEIGHT), pygame.SRCALPHA)
         overlay.fill((0, 0, 0, 140))
         self.screen.blit(overlay, (0, 0))
-        self.hud.draw_message(
-            ["PAUSED", "Press P to resume"],
-            [C.YELLOW, C.WHITE]
-        )
+        self.hud.draw_message(["PAUSED", "Press P to resume"], [C.YELLOW, C.WHITE])
 
     def _render_game_over(self) -> None:
         """Game-over overlay with score and restart prompt."""
@@ -521,7 +520,7 @@ class GameEngine:
         self.screen.blit(overlay, (0, 0))
         self.hud.draw_message(
             ["GAME OVER", f"Score: {self.player.score:,}", "Press ENTER or R to retry"],
-            [C.RED, C.WHITE, C.YELLOW]
+            [C.RED, C.WHITE, C.YELLOW],
         )
 
     def _render_level_complete(self) -> None:
@@ -530,6 +529,5 @@ class GameEngine:
         overlay.fill((0, 0, 0, 120))
         self.screen.blit(overlay, (0, 0))
         self.hud.draw_message(
-            [f"LEVEL {self.level} CLEAR!", "Get ready…"],
-            [C.GREEN, C.CYAN]
+            [f"LEVEL {self.level} CLEAR!", "Get ready…"], [C.GREEN, C.CYAN]
         )

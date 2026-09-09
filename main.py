@@ -8,7 +8,9 @@ Run this module to launch the game:
 """
 
 import sys
+
 from engine import GameEngine
+
 
 def main() -> None:
     """Instantiate and run the main game engine."""
@@ -18,6 +20,7 @@ def main() -> None:
     except KeyboardInterrupt:
         print("\nExiting Space Invaders. Goodbye!")
         sys.exit(0)
+
 
 if __name__ == "__main__":
     main()
