@@ -99,7 +99,7 @@ class AlienFleet:
             for col in range(C.ALIEN_COLS):
                 x = C.ALIEN_FLEET_LEFT + col * C.ALIEN_H_SPACING
                 y = C.ALIEN_FLEET_TOP + y_offset + row * C.ALIEN_V_SPACING
-                alien = Alien(x, y, row, col, self._alien_surfaces)
+                alien = Alien(x, y, row, col, alien_surfaces=self._alien_surfaces)
                 grid_row.append(alien)
                 self.aliens.append(alien)
             self.grid.append(grid_row)

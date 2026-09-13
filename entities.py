@@ -215,6 +215,7 @@ class Alien(Entity):
         y: float,
         row: int,
         col: int,
+        *,
         alien_surfaces: dict[int, list[pygame.Surface]],
     ) -> None:
         self.row = row
